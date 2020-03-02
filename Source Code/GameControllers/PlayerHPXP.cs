@@ -160,8 +160,8 @@ public class PlayerHPXP : MonoBehaviour, IPunObservable
     {
         if (statPoints > 0)
         {
-            playerMaxHealth *= 1.25f;
-            playerHealth = playerMaxHealth;
+            playerMaxHealth += 25f;
+            playerHealth += 25;
             ReduceStatPoints();
             healthbar.SetMaxBar(playerMaxHealth);
         }

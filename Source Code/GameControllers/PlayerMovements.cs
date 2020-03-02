@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class PlayerMovements : MonoBehaviour, IPunObservable
 {
-    private float moveSpeed = 15.0f, currentSpeed, dashSpeed = 30f, playerDamage = 20, dashTimer, dashDuration = .1f, dashDelay = 1, dashTime = -1f, angle, fireTimer, fireRate = 1f, FireTime = -1f;
-    public float AttackRange = 3;
-    private bool canDash = true, canFire = true, exposition=true;
+    private float moveSpeed = 10.0f, currentSpeed, dashSpeed = 30f, playerDamage = 20, dashTimer, dashDuration = .1f, dashDelay = 1, dashTime = -1f, angle, fireTimer, fireRate = 1f, FireTime = -1f;
+    public float AttackRange = 3, swingspeed =.1f;
+    private bool canDash = true, canFire = true, exposition = true, swordSwing = false;
     public bool meleeChar = false;
 
     private Rigidbody2D body;
@@ -14,8 +14,8 @@ public class PlayerMovements : MonoBehaviour, IPunObservable
     private PhotonView PV;
     public UnityEngine.Camera cam;
     public AudioListener audioL;
-    public Transform middleP;
-    public GameObject projectilePrefab, expositionBox;
+    public Transform middleP, endSwingPos, startSwingPos;
+    public GameObject projectilePrefab, expositionBox, sword;
     public Transform arm;
     public Canvas canvas;
     public LayerMask whatIsEnemy;
@@ -64,6 +64,17 @@ public class PlayerMovements : MonoBehaviour, IPunObservable
             var v3 = Input.mousePosition;
             v3.z = 10.0F;
 
+            if (swordSwing)
+            {
+                Debug.Log(sword.transform.eulerAngles);
+                sword.transform.position = Vector2.MoveTowards(sword.transform.position, endSwingPos.transform.position, swingspeed);
+                if (sword.transform.position == endSwingPos.transform.position)
+                {
+                    swordSwing = false;
+                    sword.SetActive(false);
+                }
+            }
+
             mousePos = cam.ScreenToWorldPoint(v3);
             if (pHpXp.IsAlive())
             {
@@ -75,13 +86,17 @@ public class PlayerMovements : MonoBehaviour, IPunObservable
                     }
                     else
                     {
+                        sword.SetActive(true);
+                        swordSwing = true;
+                        sword.transform.position = startSwingPos.position;
                         FireTime = Time.time + fireRate;
                         canFire = false;
                         Collider2D[] enemiesToDamage = Physics2D.OverlapCircleAll(arm.position, AttackRange, whatIsEnemy);
                         for (int i = 0; i < enemiesToDamage.Length; i++)
                         {
                             enemiesToDamage[i].GetComponent<BaddieHealth>().TakeDamage(playerDamage);
-                            enemiesToDamage[i].transform.position = Vector2.MoveTowards(enemiesToDamage[i].transform.position, transform.position, -1 * 50 * Time.deltaTime);
+                            if(enemiesToDamage[i].GetComponent<BaddieHealth>().getHP()<500)
+                                enemiesToDamage[i].transform.position = Vector2.MoveTowards(enemiesToDamage[i].transform.position, transform.position, -1 * 50 * Time.deltaTime);
                         }
                     }
                 }
@@ -133,7 +148,7 @@ public class PlayerMovements : MonoBehaviour, IPunObservable
     {
         if (pHpXp.GetStatPoints() > 0)
         {
-            playerDamage *= 1.25f;
+            playerDamage += 5f;
             pHpXp.ReduceStatPoints();
         }
     }
@@ -142,7 +157,8 @@ public class PlayerMovements : MonoBehaviour, IPunObservable
     {
         if (pHpXp.GetStatPoints() > 0)
         {
-            fireRate *= .8f;
+            fireRate -= .2f;
+            swingspeed += .04f;
             pHpXp.ReduceStatPoints();
         }
     }
@@ -151,7 +167,7 @@ public class PlayerMovements : MonoBehaviour, IPunObservable
     {
         if (pHpXp.GetStatPoints() > 0)
         {
-            dashDelay *= .8f;
+            dashDelay -= .2f;
             pHpXp.ReduceStatPoints();
         }
     }
@@ -160,7 +176,7 @@ public class PlayerMovements : MonoBehaviour, IPunObservable
     {
         if (pHpXp.GetStatPoints() > 0)
         {
-            moveSpeed *= 1.25f;
+            moveSpeed += 3f;
             pHpXp.ReduceStatPoints();
         }
     }
@@ -175,7 +191,6 @@ public class PlayerMovements : MonoBehaviour, IPunObservable
         yield return new WaitForSeconds(1);
         foreach (Transform child in transform)
         {
-            Debug.Log(child.name);
             if (child.name == "PlayerAvatar2(Clone)")
             {
                 meleeChar = true;

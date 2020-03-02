@@ -3,9 +3,9 @@ using UnityEngine;
 
 public class RangedEnemyMovement : MonoBehaviour
 {
-    private Transform closestPlayer;
+    private Transform closestPlayer, parent;
     private Rigidbody2D rigidbody2d;
-    public GameObject middlePoint, firePoint;
+    public GameObject middlePoint, firePoint, parentHolder;
     private PhotonView PV;
     private float fireRate = 2f, FireTime = -1f, angle;
     public float damage = 20;
@@ -15,6 +15,23 @@ public class RangedEnemyMovement : MonoBehaviour
     {
         rigidbody2d = gameObject.GetComponent<Rigidbody2D>();
         PV = GetComponent<PhotonView>();
+
+        if(GameObject.FindGameObjectsWithTag("Bossholder")[0])
+            parentHolder = GameObject.FindGameObjectsWithTag("Bossholder")[0];
+
+        foreach (Transform child in parentHolder.transform)
+        {
+            float temp = Vector3.Distance(child.transform.position, transform.position);
+            if (!parent)
+            {
+                parent = child.transform;
+            }
+            else if (temp < Vector3.Distance(parent.transform.position, transform.position))
+            {
+                parent = child.transform;
+            }
+        }
+        this.transform.SetParent(parent);
     }
 
     void Update()
@@ -36,7 +53,7 @@ public class RangedEnemyMovement : MonoBehaviour
         }
         float dist = Vector2.Distance(closestPlayer.transform.position, transform.position);
 
-        if (dist > 10f && dist > 25)
+        if (dist > 10f)// && dist < 30)
         {
             rigidbody2d.velocity = (closestPlayer.transform.position - transform.position).normalized * 5;
         }
@@ -75,6 +92,7 @@ public class RangedEnemyMovement : MonoBehaviour
                     var bulletRef = PhotonNetwork.InstantiateSceneObject(System.IO.Path.Combine("PhotonPrefabs", "EnemyProjectile"),
                     firePoint.transform.position, Quaternion.Euler(0, 0, angle - 90), 0);
                     bulletRef.GetComponent<EnemyBullet>().SetDamageAndOwner(damage, this.transform);
+                    Physics2D.IgnoreCollision(bulletRef.GetComponent<Collider2D>(), GetComponent<Collider2D>(), true);
                 }
             }
     }

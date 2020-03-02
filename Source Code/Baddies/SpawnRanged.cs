@@ -50,7 +50,6 @@ public class SpawnRanged : MonoBehaviour
         {
             var minion = PhotonNetwork.InstantiateSceneObject(System.IO.Path.Combine("PhotonPrefabs", "Enemy"),
                 transform.position+new Vector3(0,3,0), Quaternion.Euler(0, 0, 0), 0);
-            minion.GetComponent<EnemyAI>().SetParent(this.transform);
         }
     }
 }

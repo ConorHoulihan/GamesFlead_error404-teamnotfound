@@ -7,7 +7,8 @@ using Pathfinding;
 
 public class EnemyAI : MonoBehaviour
 {
-    public Transform target;
+    private Transform target, parent;
+    private GameObject parentHolder;
     public float speed = 300f;
     public float NextWaypointDist=1f;
 
@@ -23,6 +24,22 @@ public class EnemyAI : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
 
         InvokeRepeating("UpdatePath", 0, 0.5f);
+
+        parentHolder = GameObject.FindGameObjectsWithTag("Spawnerholder")[0];
+
+        foreach (Transform child in parentHolder.transform)
+        {
+            float temp = Vector3.Distance(child.transform.position, transform.position);
+            if (!parent)
+            {
+                parent = child.transform;
+            }
+            else if (temp < Vector3.Distance(parent.transform.position, transform.position))
+            {
+                parent = child.transform;
+            }
+        }
+        this.transform.SetParent(parent);
     }
 
     void UpdatePath()
