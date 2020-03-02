@@ -9,7 +9,7 @@ public class RangedEnemyMovement : MonoBehaviour
     private PhotonView PV;
     private float fireRate = 2f, FireTime = -1f, angle;
     public float damage = 20;
-    public GameObject prefab;
+    //public GameObject prefab;
 
     void Start()
     {
@@ -34,16 +34,15 @@ public class RangedEnemyMovement : MonoBehaviour
                 }
             }
         }
-        //if (closestPlayer) { 
         float dist = Vector2.Distance(closestPlayer.transform.position, transform.position);
 
-        if (dist > 6f && dist > 25)
+        if (dist > 10f && dist > 25)
         {
             rigidbody2d.velocity = (closestPlayer.transform.position - transform.position).normalized * 5;
         }
-        else if (dist < 5f)
+        else if (dist < 8f)
         {
-            rigidbody2d.velocity = -(closestPlayer.transform.position - transform.position).normalized * 5;
+            rigidbody2d.velocity = -(closestPlayer.transform.position - transform.position).normalized * 10;
         }
         else
         {

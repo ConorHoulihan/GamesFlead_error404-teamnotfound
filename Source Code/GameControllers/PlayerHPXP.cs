@@ -7,12 +7,12 @@ using UnityEngine.UI;
 public class PlayerHPXP : MonoBehaviour, IPunObservable
 {
     public float playerHealth, playerMaxHealth = 100f, playerXp, playerDamage = 20f, damageCD = .5f, damageCDTime = -1;
-    public int potionCount = 0, currentLevel = 1, statPoints = 0, SpawnPos=-1;
+    public int potionCount = 0, currentLevel = 1, statPoints = 0;
     public bool isAlive = true;
     public Healthbar healthbar, XPBar;
     public PlayerMovements pm;
     private PhotonView PV;
-    public Text XPtext, statPointsText, HpText;
+    public Text XPtext, statPointsText, HpText, potionCounterTxt;
     public GameObject LevelUpUI;
     private Transform closestLivingPlayer;
 
@@ -35,6 +35,7 @@ public class PlayerHPXP : MonoBehaviour, IPunObservable
             healthbar.SetCurrent(playerHealth);
             HpText.text = playerHealth + "/" + playerMaxHealth;
             closestLivingPlayer = null;
+            potionCounterTxt.text = "Health Potions: " + potionCount;
 
             foreach (Transform child in transform)
             {
@@ -128,7 +129,7 @@ public class PlayerHPXP : MonoBehaviour, IPunObservable
         }
         if (collision.gameObject.tag == "Potion")
         {
-            potionCount++;
+            potionCount += 4;
         }
     }
 
@@ -180,14 +181,10 @@ public class PlayerHPXP : MonoBehaviour, IPunObservable
     {
         return isAlive;
     }
-    public void SetSpawnPos(int i)
-    {
-        SpawnPos = i;
-    }
 
-    public void Revive()
+    public void Revive(Transform revPoint)
     {
-        transform.position = GameSetup.GS.spawnPoints[SpawnPos].position;
+        transform.position = revPoint.position;
         playerHealth = playerMaxHealth;
         isAlive = true;
     }

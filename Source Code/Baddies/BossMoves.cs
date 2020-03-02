@@ -7,7 +7,8 @@ public class BossMoves : MonoBehaviour
 {
     private PhotonView PV;
     public Transform spawnPoint, firePoint, closestPlayer;
-    private float spawnTime = -1f, spawnDelay = 1f, damage = 20, angle = 0, fireTime = -1f, fireDelay = .5f, minionCount = 4;
+    private float spawnTime = -1f, spawnDelay = 1f, damage = 20, angle = 0, fireTime = -1f, minionCount = 4, baddieCount;
+    public float fireDelay = .5f, maxBaddies;
 
     void Start()
     {
@@ -29,16 +30,27 @@ public class BossMoves : MonoBehaviour
                 closestPlayer = go.transform;
             }
         }
-
-        if ((GameObject.FindGameObjectsWithTag("Baddie1").Length < 4) && (Time.time > spawnTime) && (Vector2.Distance(closestPlayer.position, transform.position)<35))
+        baddieCount = 0;
+        foreach (Transform child in GetComponentsInChildren<Transform>())
         {
-            spawnTime = Time.time + spawnDelay;
-            PV.RPC("RPC_SpawnMinion", RpcTarget.AllViaServer);
+            if (child.tag == "Baddie")
+            {
+                baddieCount++;
+            }
         }
-        if ((Time.time > fireTime) && (Vector2.Distance(closestPlayer.position, transform.position) < 20)) {
-            fireTime = Time.time + fireDelay;
-            angle += 10;
-            PV.RPC("RPC_FireProjectile", RpcTarget.AllViaServer);
+        if (closestPlayer)
+        {
+            if ((baddieCount < maxBaddies) && (Time.time > spawnTime) && (Vector2.Distance(closestPlayer.position, transform.position) < 20))
+            {
+                spawnTime = Time.time + spawnDelay;
+                PV.RPC("RPC_SpawnMinion", RpcTarget.AllViaServer);
+            }
+            if ((Time.time > fireTime) && (Vector2.Distance(closestPlayer.position, transform.position) < 20))
+            {
+                fireTime = Time.time + fireDelay;
+                angle += 10;
+                PV.RPC("RPC_FireProjectile", RpcTarget.AllViaServer);
+            }
         }
     }
 
@@ -47,9 +59,9 @@ public class BossMoves : MonoBehaviour
     {
         if (PV.IsMine)
         {
-            var minion = PhotonNetwork.InstantiateSceneObject(System.IO.Path.Combine("PhotonPrefabs", "Enemy"),
+            var minion = PhotonNetwork.InstantiateSceneObject(System.IO.Path.Combine("PhotonPrefabs", "Enemy2"),
             spawnPoint.transform.position, Quaternion.Euler(0, 0, 0), 0);
-            minion.GetComponent<EnemyAI>().SetParent(this.transform);
+            minion.GetComponent<RangedEnemyMovement>().SetParent(this.transform);
         }
     }
 

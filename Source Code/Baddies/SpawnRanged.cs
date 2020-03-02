@@ -7,8 +7,7 @@ public class SpawnRanged : MonoBehaviour
 {
     private Transform closestPlayer;
     private PhotonView PV;
-    private bool hasSpawned = false;
-    public float damage;
+    public float Maxbaddies, baddieCount, spawnTime = -1f, spawnDelay = .5f;
 
     private void Start()
     {
@@ -29,23 +28,29 @@ public class SpawnRanged : MonoBehaviour
                 closestPlayer = go.transform;
             }
         }
-        if (Vector2.Distance(closestPlayer.position, transform.position) < 20 && !hasSpawned && PV.IsMine)
+        baddieCount = 0;
+        foreach (Transform child in GetComponentsInChildren<Transform>())
         {
-            hasSpawned = true;
+            if (child.tag == "Baddie1")
+            {
+                baddieCount++;
+            }
+        }
+        if (Time.time > spawnTime && Vector2.Distance(closestPlayer.position, transform.position) < 30 && baddieCount < Maxbaddies)
+        {
+            spawnTime = Time.time + spawnDelay;
             PV.RPC("RPC_SpawnMinions", RpcTarget.AllViaServer);
         }
     }
+
     [PunRPC]
     void RPC_SpawnMinions()
     {
         if (PV.IsMine)
         {
-            foreach (Transform child in GetComponentsInChildren<Transform>())
-            {
-                var minion = PhotonNetwork.InstantiateSceneObject(System.IO.Path.Combine("PhotonPrefabs", "Enemy2"),
-                    child.transform.position, Quaternion.Euler(0, 0, 0), 0);
-                minion.GetComponent<RangedEnemyMovement>().SetParent(child.transform);
-            }
+            var minion = PhotonNetwork.InstantiateSceneObject(System.IO.Path.Combine("PhotonPrefabs", "Enemy"),
+                transform.position+new Vector3(0,3,0), Quaternion.Euler(0, 0, 0), 0);
+            minion.GetComponent<EnemyAI>().SetParent(this.transform);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Photon.Pun;
+using System.Collections;
 using UnityEngine;
 
 public class PlayerMovements : MonoBehaviour, IPunObservable
@@ -30,6 +31,7 @@ public class PlayerMovements : MonoBehaviour, IPunObservable
         {
             ActivePlayer(false);
         }
+        StartCoroutine(DelaySetMelee());
     }
 
     void Update()
@@ -120,22 +122,6 @@ public class PlayerMovements : MonoBehaviour, IPunObservable
         }
     }
 
-    void IPunObservable.OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-    {
-        if (stream.IsWriting)
-        {
-            stream.SendNext(middleP.localRotation);
-            if(body)
-            stream.SendNext(body.velocity);
-        }
-        else if (stream.IsReading)
-        {
-            middleP.localRotation = (Quaternion)stream.ReceiveNext();
-            if (body)
-                body.velocity = (Vector2)stream.ReceiveNext();
-        }
-    }
-
     public void ActivePlayer(bool isActiveP)
     {
         cam.enabled = isActiveP;
@@ -182,6 +168,35 @@ public class PlayerMovements : MonoBehaviour, IPunObservable
     public float GetDamage()
     {
         return playerDamage;
+    }
+
+    IEnumerator DelaySetMelee()
+    {
+        yield return new WaitForSeconds(1);
+        foreach (Transform child in transform)
+        {
+            Debug.Log(child.name);
+            if (child.name == "PlayerAvatar2(Clone)")
+            {
+                meleeChar = true;
+            }
+        }
+    }
+
+    void IPunObservable.OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+        {
+            stream.SendNext(middleP.localRotation);
+            if (body)
+                stream.SendNext(body.velocity);
+        }
+        else if (stream.IsReading)
+        {
+            middleP.localRotation = (Quaternion)stream.ReceiveNext();
+            if (body)
+                body.velocity = (Vector2)stream.ReceiveNext();
+        }
     }
 
     [PunRPC]

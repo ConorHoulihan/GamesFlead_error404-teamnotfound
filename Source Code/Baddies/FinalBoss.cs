@@ -9,8 +9,9 @@ public class FinalBoss : MonoBehaviour
     private Rigidbody2D rb;
     public Collider2D arm1, arm2;
     public Transform spawnPoint, firePoint, spinPoint1, spinPoint2, middle, closestPlayer;
-    private float spawnTime = -1f, spawnDelay = 5f, fireTime = -1f, fireDelay = .5f, damage = 20, angle = 0, armAngle = 270, armMoveCount = 1, baddieCount = 0, baddieCount2 = 0;
+    private float spawnTime = -1f, spawnDelay = 5f, fireTime = -1f, damage = 20, angle = 0, armAngle = 270, armMoveCount = 1, baddieCount = 0;
     private bool goingDown = true, firstboost=true;
+    public float fireDelay = .3f;
 
     void Start()
     {
@@ -39,22 +40,25 @@ public class FinalBoss : MonoBehaviour
         baddieCount = 0;
         foreach (Transform child in GetComponentsInChildren<Transform>())
         {
-            if (child.tag == "Baddie")
+            if (child.tag == "Baddie1")
             {
                 baddieCount++;
             }
         }
-        if ((Time.time > spawnTime) && (Vector2.Distance(closestPlayer.position, transform.position) < 30))
+        if (closestPlayer)
         {
-            spawnTime = Time.time + spawnDelay;
-            if(baddieCount < 5)
-            PV.RPC("RPC_SpawnMinion", RpcTarget.AllViaServer);
-        }
-        if (Time.time > fireTime && (Vector2.Distance(closestPlayer.position, transform.position) < 30))
-        {
-            fireTime = Time.time + fireDelay;
-            angle += 10;
-            PV.RPC("RPC_FireProjectile", RpcTarget.AllViaServer);
+            if ((Time.time > spawnTime) && (Vector2.Distance(closestPlayer.position, transform.position) < 30))
+            {
+                spawnTime = Time.time + spawnDelay;
+                if (baddieCount < 5)
+                    PV.RPC("RPC_SpawnMinion", RpcTarget.AllViaServer);
+            }
+            if (Time.time > fireTime && (Vector2.Distance(closestPlayer.position, transform.position) < 30))
+            {
+                fireTime = Time.time + fireDelay;
+                angle += 10;
+                PV.RPC("RPC_FireProjectile", RpcTarget.AllViaServer);
+            }
         }
         if(transform.position == middle.position)
         {
@@ -106,8 +110,11 @@ public class FinalBoss : MonoBehaviour
         if (PV.IsMine)
         {
             var minion = PhotonNetwork.InstantiateSceneObject(System.IO.Path.Combine("PhotonPrefabs", "Enemy2"),
-            spawnPoint.transform.position + new Vector3(2, 0, 0), Quaternion.Euler(0, 0, 0), 0);
-            minion.GetComponent<RangedEnemyMovement>().SetParent(this.transform);
+            spawnPoint.transform.position + new Vector3(2, 0, 0), Quaternion.Euler(0, 0, 0), 0);Debug.Log(minion.GetComponent<EnemyAI>() + "FFFFF");
+            minion.GetComponent<EnemyAI>().SetParent(this.transform);
+            //Physics2D.IgnoreCollision(minion.GetComponent<Collider2D>(), arm1.GetComponent<Collider2D>(), true);
+            //Physics2D.IgnoreCollision(minion.GetComponent<Collider2D>(), arm2.GetComponent<Collider2D>(), true);
+            //Physics2D.IgnoreCollision(minion.GetComponent<Collider2D>(), GetComponent<Collider2D>(), true);
         }
     }
 

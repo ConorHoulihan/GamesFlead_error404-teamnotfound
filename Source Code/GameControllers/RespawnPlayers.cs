@@ -32,7 +32,8 @@ public class RespawnPlayers : MonoBehaviour
         yield return new WaitForSeconds(1);
         foreach (GameObject player in players)
         {
-            player.GetComponent<PlayerHPXP>().Revive();
+            
+            player.GetComponent<PlayerHPXP>().Revive(this.transform);
         }
     }
 }
