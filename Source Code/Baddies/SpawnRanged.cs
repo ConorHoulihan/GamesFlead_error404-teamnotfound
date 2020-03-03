@@ -46,7 +46,7 @@ public class SpawnRanged : MonoBehaviour
     [PunRPC]
     void RPC_SpawnMinions()
     {
-        if (PV.IsMine)
+        if (PhotonNetwork.IsMasterClient)
         {
             var minion = PhotonNetwork.InstantiateSceneObject(System.IO.Path.Combine("PhotonPrefabs", "Enemy"),
                 transform.position+new Vector3(0,3,0), Quaternion.Euler(0, 0, 0), 0);

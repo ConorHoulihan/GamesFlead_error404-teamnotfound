@@ -86,7 +86,7 @@ public class RangedEnemyMovement : MonoBehaviour
     void RPC_FireProjectile()
     {
         if (PV)
-            if (PV.IsMine)
+            if (PhotonNetwork.IsMasterClient)
             {
                 {
                     var bulletRef = PhotonNetwork.InstantiateSceneObject(System.IO.Path.Combine("PhotonPrefabs", "EnemyProjectile"),

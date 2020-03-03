@@ -57,7 +57,7 @@ public class BossMoves : MonoBehaviour
     [PunRPC]
     void RPC_SpawnMinion()
     {
-        if (PV.IsMine)
+        if (PhotonNetwork.IsMasterClient)
         {
             var minion = PhotonNetwork.InstantiateSceneObject(System.IO.Path.Combine("PhotonPrefabs", "Enemy2"),
             spawnPoint.transform.position, Quaternion.Euler(0, 0, 0), 0);
@@ -68,7 +68,7 @@ public class BossMoves : MonoBehaviour
     [PunRPC]
     void RPC_FireProjectile()
     {
-        if (PV.IsMine)
+        if (PhotonNetwork.IsMasterClient)
         {
             var bulletRef = PhotonNetwork.InstantiateSceneObject(System.IO.Path.Combine("PhotonPrefabs", "BossProjectile"),
                 firePoint.transform.position, Quaternion.Euler(0, 0, angle - 90), 0);

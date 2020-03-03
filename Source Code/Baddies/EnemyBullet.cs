@@ -12,6 +12,7 @@ public class EnemyBullet : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        Debug.Log(collision);
         if (collision.gameObject.tag == "Baddie" || collision.gameObject.tag == "Baddie1")
         {
             Physics2D.IgnoreCollision(collision.transform.GetComponent<Collider2D>(), this.GetComponent<Collider2D>());
