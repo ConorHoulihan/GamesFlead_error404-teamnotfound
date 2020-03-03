@@ -153,7 +153,7 @@ public class PlayerHPXP : MonoBehaviour, IPunObservable
         XPBar.SetCurrent(playerXp);
         XPBar.SetMaxBar((currentLevel * currentLevel) * 100);
         XPtext.text = currentLevel.ToString() + ":  " + playerXp.ToString() + "/" + ((currentLevel * currentLevel) * 100);
-        statPoints += (int)Mathf.Ceil(currentLevel/2);
+        statPoints += (int)Mathf.Ceil(currentLevel/3);
     }
 
     public void IncreaseHealth()

@@ -1,12 +1,13 @@
 ﻿using Photon.Pun;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerMovements : MonoBehaviour, IPunObservable
 {
     private float moveSpeed = 10.0f, currentSpeed, dashSpeed = 30f, playerDamage = 20, dashTimer, dashDuration = .1f, dashDelay = 1, dashTime = -1f, angle, fireTimer, fireRate = 1f, FireTime = -1f;
     public float AttackRange = 3, swingspeed =.1f;
-    private bool canDash = true, canFire = true, exposition = true, swordSwing = false;
+    private bool canDash = true, canFire = true, exposition = true, swordSwing = false, gameOver=false;
     public bool meleeChar = false;
 
     private Rigidbody2D body;
@@ -15,7 +16,7 @@ public class PlayerMovements : MonoBehaviour, IPunObservable
     public UnityEngine.Camera cam;
     public AudioListener audioL;
     public Transform middleP, endSwingPos, startSwingPos;
-    public GameObject projectilePrefab, expositionBox, sword;
+    public GameObject projectilePrefab, expositionBox, sword, SpeedUpBar, dashDelayBar, fireDelayBar, finalBoss, endDialogue;
     public Transform arm;
     public Canvas canvas;
     public LayerMask whatIsEnemy;
@@ -66,7 +67,6 @@ public class PlayerMovements : MonoBehaviour, IPunObservable
 
             if (swordSwing)
             {
-                Debug.Log(sword.transform.eulerAngles);
                 sword.transform.position = Vector2.MoveTowards(sword.transform.position, endSwingPos.transform.position, swingspeed);
                 if (sword.transform.position == endSwingPos.transform.position)
                 {
@@ -95,8 +95,12 @@ public class PlayerMovements : MonoBehaviour, IPunObservable
                         for (int i = 0; i < enemiesToDamage.Length; i++)
                         {
                             enemiesToDamage[i].GetComponent<BaddieHealth>().TakeDamage(playerDamage);
-                            if(enemiesToDamage[i].GetComponent<BaddieHealth>().getHP()<500)
+                            if(enemiesToDamage[i].GetComponent<BaddieHealth>().getMaxHP()<500)
                                 enemiesToDamage[i].transform.position = Vector2.MoveTowards(enemiesToDamage[i].transform.position, transform.position, -1 * 50 * Time.deltaTime);
+                            if (enemiesToDamage[i].gameObject.GetComponent<BaddieHealth>().getHP() <= 0)
+                            {
+                                transform.GetComponent<PlayerHPXP>().AddExp(enemiesToDamage[i].gameObject.GetComponent<BaddieHealth>().GetExp());
+                            }
                         }
                     }
                 }
@@ -118,6 +122,7 @@ public class PlayerMovements : MonoBehaviour, IPunObservable
             if (!exposition)
                 expositionBox.SetActive(false);
         }
+        IsGameOver();
     }
     void OnDrawGizmosSelected()
     {
@@ -160,6 +165,10 @@ public class PlayerMovements : MonoBehaviour, IPunObservable
             fireRate -= .2f;
             swingspeed += .04f;
             pHpXp.ReduceStatPoints();
+            if (fireRate < .3)
+            {
+                fireDelayBar.SetActive(false);
+            }
         }
     }
 
@@ -169,6 +178,10 @@ public class PlayerMovements : MonoBehaviour, IPunObservable
         {
             dashDelay -= .2f;
             pHpXp.ReduceStatPoints();
+            if(dashDelay< .3)
+            {
+                dashDelayBar.SetActive(false);
+            }
         }
     }
 
@@ -178,8 +191,23 @@ public class PlayerMovements : MonoBehaviour, IPunObservable
         {
             moveSpeed += 3f;
             pHpXp.ReduceStatPoints();
+            if (moveSpeed > 30)
+            {
+                SpeedUpBar.SetActive(false);
+            }
         }
     }
+    public void IsGameOver()
+    {
+        finalBoss = GameObject.FindGameObjectsWithTag("Bossholder")[0];
+        if (finalBoss.transform.childCount <= 0 && !gameOver)
+        {
+            gameOver = true;
+            transform.position = new Vector3(0, 0, 0);
+            endDialogue.SetActive(true);
+        }
+    }
+
 
     public float GetDamage()
     {
@@ -194,6 +222,7 @@ public class PlayerMovements : MonoBehaviour, IPunObservable
             if (child.name == "PlayerAvatar2(Clone)")
             {
                 meleeChar = true;
+                playerDamage *= 1.5f;
             }
         }
     }
